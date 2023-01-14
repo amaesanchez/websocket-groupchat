@@ -63,7 +63,9 @@ $("form").submit(function (evt) {
   const message = $("#m").val();
 
   if (message === '/joke') {
-    data = { type: 'joke' };
+    data = { type: 'get-joke' };
+  } else if (message === '/members') {
+    data = { type: 'get-members' };
   } else {
     data = { type: "chat", text: message };
   }

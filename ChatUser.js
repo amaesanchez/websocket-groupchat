@@ -63,7 +63,7 @@ class ChatUser {
     });
   }
 
-  /** Handle a joke request: send back to user. */
+  /** Handle a joke request: send back to client. */
 
   async handleJoke() {
     this.send(JSON.stringify(
@@ -72,7 +72,21 @@ class ChatUser {
         name: "Server",
         text: await getJoke()
       }
-    ))
+    ));
+  }
+
+  /** Handle a request to get members: sends list of members to client. */
+
+  handleMembers() {
+    const members = this.room.getMemberUsernames();
+    const text = `In room: ${members.join(', ')}.`;
+    this.send(JSON.stringify(
+      {
+        type: "chat",
+        name: "Server",
+        text: text
+      }
+    ));
   }
 
   /** Handle messages from client:
@@ -90,7 +104,8 @@ class ChatUser {
 
     if (msg.type === "join") this.handleJoin(msg.name);
     else if (msg.type === "chat") this.handleChat(msg.text);
-    else if (msg.type === 'joke') await this.handleJoke();
+    else if (msg.type === 'get-joke') await this.handleJoke();
+    else if (msg.type === 'get-members') this.handleMembers();
     else throw new Error(`bad message: ${msg.type}`);
   }
 

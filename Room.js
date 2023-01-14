@@ -67,6 +67,16 @@ class Room {
       member.send(JSON.stringify(data));
     }
   }
+
+  /** Get the usernames of all the members in the room
+   *
+   * returns: Array of Strings
+   */
+
+  getMemberUsernames() {
+    const members = Array.from(this.members);
+    return members.map(member => member.name);
+  }
 }
 
 module.exports = Room;
