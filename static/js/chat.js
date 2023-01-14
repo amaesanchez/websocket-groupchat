@@ -59,7 +59,14 @@ ws.onclose = function (evt) {
 $("form").submit(function (evt) {
   evt.preventDefault();
 
-  let data = { type: "chat", text: $("#m").val() };
+  let data;
+  const message = $("#m").val();
+
+  if (message === '/joke') {
+    data = { type: 'joke' };
+  } else {
+    data = { type: "chat", text: message };
+  }
   ws.send(JSON.stringify(data));
 
   $("#m").val("");

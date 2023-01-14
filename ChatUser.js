@@ -55,19 +55,24 @@ class ChatUser {
    * @param text {string} message to send
    * */
 
-  async handleChat(text) {
-    if (text === "/joke") {
-      this.send(JSON.stringify({
-        type: "note",
-        text: await getJoke(),
-      }));
-    } else {
-      this.room.broadcast({
-        name: this.name,
+  handleChat(text) {
+    this.room.broadcast({
+      name: this.name,
+      type: "chat",
+      text: text,
+    });
+  }
+
+  /** Handle a joke request: send back to user. */
+
+  async handleJoke() {
+    this.send(JSON.stringify(
+      {
         type: "chat",
-        text: text,
-      });
-    }
+        name: "Server",
+        text: await getJoke()
+      }
+    ))
   }
 
   /** Handle messages from client:
@@ -84,7 +89,8 @@ class ChatUser {
     let msg = JSON.parse(jsonData);
 
     if (msg.type === "join") this.handleJoin(msg.name);
-    else if (msg.type === "chat") await this.handleChat(msg.text);
+    else if (msg.type === "chat") this.handleChat(msg.text);
+    else if (msg.type === 'joke') await this.handleJoke();
     else throw new Error(`bad message: ${msg.type}`);
   }
 
