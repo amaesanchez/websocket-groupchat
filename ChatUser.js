@@ -66,49 +66,67 @@ class ChatUser {
   /** Handle a joke request: send back to client. */
 
   async handleJoke() {
-    this.send(JSON.stringify(
-      {
+    this.send(
+      JSON.stringify({
         type: "chat",
         name: "Server",
-        text: await getJoke()
-      }
-    ));
+        text: await getJoke(),
+      })
+    );
   }
 
   /** Handle a request to get members: sends list of members to client. */
 
   handleMembers() {
     const members = this.room.getMemberUsernames();
-    const text = `In room: ${members.join(', ')}.`;
-    this.send(JSON.stringify(
-      {
+    const text = `In room: ${members.join(", ")}.`;
+    this.send(
+      JSON.stringify({
         type: "chat",
         name: "Server",
-        text: text
-      }
-    ));
+        text: text,
+      })
+    );
   }
 
   /** Handle a request to send a private message to a member */
 
   handlePrivateChat(text) {
-    const [ cmd, username, ...message ] = text.split(' ');
+    const [cmd, username, ...message] = text.split(" ");
 
     if (!username || !message) return;
 
     const user = Array.from(this.room.members).find(
-      member => member.name === username
+      (member) => member.name === username
     );
 
     if (!user) return;
 
-    user.send(JSON.stringify(
-      {
+    user.send(
+      JSON.stringify({
         type: "chat",
         name: this.name,
-        text: message.join(' ')
-      }
-    ));
+        text: message.join(" "),
+      })
+    );
+  }
+
+  /** Separates new username from msg and changes current user's
+   * name to the new username
+   *
+   * broadcasts username change to room
+   */
+
+  handleChangeUsername(text) {
+    const [cmd, newUsername] = text.split(" ");
+
+    if (!newUsername) return;
+
+    this.name = newUsername;
+    this.room.broadcast({
+      type: "note",
+      text: `${newUsername} has changed their username.`,
+    });
   }
 
   /** Handle messages from client:
@@ -126,9 +144,10 @@ class ChatUser {
 
     if (msg.type === "join") this.handleJoin(msg.name);
     else if (msg.type === "chat") this.handleChat(msg.text);
-    else if (msg.type === 'get-joke') await this.handleJoke();
-    else if (msg.type === 'get-members') this.handleMembers();
-    else if (msg.type === 'private') this.handlePrivateChat(msg.text);
+    else if (msg.type === "get-joke") await this.handleJoke();
+    else if (msg.type === "get-members") this.handleMembers();
+    else if (msg.type === "private") this.handlePrivateChat(msg.text);
+    else if (msg.type === "new-name") this.handleChangeUsername(msg.text);
     else throw new Error(`bad message: ${msg.type}`);
   }
 

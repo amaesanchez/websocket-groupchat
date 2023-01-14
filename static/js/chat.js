@@ -68,6 +68,8 @@ $("form").submit(function (evt) {
     data = { type: 'get-members' };
   } else if (message.indexOf('/priv') !== -1) {
     data = { type: 'private', text: message };
+  } else if (message.indexOf('/name') !== -1) {
+    data = { type: 'new-name', text: message };
   } else {
     data = { type: "chat", text: message };
   }
