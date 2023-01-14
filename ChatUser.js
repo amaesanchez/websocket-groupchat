@@ -4,6 +4,7 @@
 
 // Room is an abstraction of a chat channel
 const Room = require("./Room");
+const { getJoke } = require("./helper");
 
 /** ChatUser is a individual connection from client -> server to chat. */
 
@@ -54,12 +55,19 @@ class ChatUser {
    * @param text {string} message to send
    * */
 
-  handleChat(text) {
-    this.room.broadcast({
-      name: this.name,
-      type: "chat",
-      text: text,
-    });
+  async handleChat(text) {
+    if (text === "/joke") {
+      this.send(JSON.stringify({
+        type: "note",
+        text: await getJoke(),
+      }));
+    } else {
+      this.room.broadcast({
+        name: this.name,
+        type: "chat",
+        text: text,
+      });
+    }
   }
 
   /** Handle messages from client:
@@ -72,11 +80,11 @@ class ChatUser {
    * </code>
    */
 
-  handleMessage(jsonData) {
+  async handleMessage(jsonData) {
     let msg = JSON.parse(jsonData);
 
     if (msg.type === "join") this.handleJoin(msg.name);
-    else if (msg.type === "chat") this.handleChat(msg.text);
+    else if (msg.type === "chat") await this.handleChat(msg.text);
     else throw new Error(`bad message: ${msg.type}`);
   }
 
