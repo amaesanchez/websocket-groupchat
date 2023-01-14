@@ -66,6 +66,8 @@ $("form").submit(function (evt) {
     data = { type: 'get-joke' };
   } else if (message === '/members') {
     data = { type: 'get-members' };
+  } else if (message.indexOf('/priv') !== -1) {
+    data = { type: 'private', text: message };
   } else {
     data = { type: "chat", text: message };
   }

@@ -89,6 +89,28 @@ class ChatUser {
     ));
   }
 
+  /** Handle a request to send a private message to a member */
+
+  handlePrivateChat(text) {
+    const [ cmd, username, ...message ] = text.split(' ');
+
+    if (!username || !message) return;
+
+    const user = Array.from(this.room.members).find(
+      member => member.name === username
+    );
+
+    if (!user) return;
+
+    user.send(JSON.stringify(
+      {
+        type: "chat",
+        name: this.name,
+        text: message.join(' ')
+      }
+    ));
+  }
+
   /** Handle messages from client:
    *
    * @param jsonData {string} raw message data
@@ -106,6 +128,7 @@ class ChatUser {
     else if (msg.type === "chat") this.handleChat(msg.text);
     else if (msg.type === 'get-joke') await this.handleJoke();
     else if (msg.type === 'get-members') this.handleMembers();
+    else if (msg.type === 'private') this.handlePrivateChat(msg.text);
     else throw new Error(`bad message: ${msg.type}`);
   }
 
